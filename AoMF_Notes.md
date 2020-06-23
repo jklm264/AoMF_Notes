@@ -29,17 +29,21 @@
       - `$vol.py psscan3`, `$vol.py psscan`, and `$vol.py bigpools`
 
 6. [Processes, Handles, and Tokens](pht.md)
-
-   - Proc Tree visualization: `$vol.py psscan \--output=dot  \-\-output-file=processes.dot` then open in [Graphviz](https://graphviz.org)
-
+- Proc Tree visualization: `$vol.py psscan \--output=dot  \-\-output-file=processes.dot` then open in [Graphviz](https://graphviz.org)
    - Use `vol.py psxview`
-     - Nice trick to show differences in pslist and psscan commands: `$ cat pslist.txt psscan.txt | awk '{print $2"\t"$3}' | sort | uniq –c | grep –v “ 2”`
-
-
+  - Nice trick to show differences in pslist and psscan commands: `$ cat pslist.txt psscan.txt | awk '{print $2"\t"$3}' | sort | uniq –c | grep –v “ 2”`
+   - [Handles, their lifetime, and how they work](pht.md#Process-Handles)
+   - Detect registry persistence with handles, printkey, and symlinkscan
 
 
 
 ### Process Memory Internals
+
+page 189 or 215
+
+Ends: 218 or 244
+
+
 
 ### Hunting Malware in Process Memory
 

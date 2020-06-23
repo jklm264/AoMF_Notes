@@ -1,18 +1,21 @@
 # Processes, Handles, and Tokens
 
-- [Critical System Processes](#Critical-System-Processes)
-- [Detect hidden processes](#Alternate-Process-Listing) - AoMF: "Realistically, it’s far easier to just inject code into a process that’s not hidden"
-- [Link processes to user accounts](#Finding-SIDs)
-- [Investigate lateral movement](#Detecting-Lateral-Movement)
-- [Analyze PrivEsc Attacks](#Detect-privilege-escalation)
+## Summary
 
+- [Processes](#Processes) are represented as `_EPROCESS` structs
+  - The `_LIST_ENTRY` is what is *walked* by manly process enumerations tools (e.g., Task Manager)
+  - [Known processes that should](#Critical-System-Processes) be on a system can be analyzed with `$vol.py psxview`
+    - [Direct Kernel Object Manipulation](#Detecting-DKOM-Attacks) are a family of attacks which hide procs from enum tools; use psxview.
+  - [Detect hidden processes](#Alternate-Process-Listing) - AoMF: "Realistically, it’s far easier to just inject code into a process that’s not hidden"
+- [Process Tokens](#Process-Tokens) describe a proc's security context
+  - [Detecting Lateral Movement](#Detecting-Lateral-Movement) and [Linking processes to user accounts](#Finding-SIDs):
+    - By using getsids to associate a proc with a user account with [their SIDs](#Finding-SIDs) found in their [tokens](#Process-Tokens)
+    - Many commonly exploited [privileges](#Privileges); to analyze use `$vol.py privs`
+- [Handles, their lifetime, and how they work](#Process-Handles)
+- [Detecting Registry Persistence](#Detecting-Registry-Persistence) via `$vol.py handles --object-type=Key --pid=1700` then confirm with `$vol.py printkey`
+- [Identifying Remote Mapped Drives](#Identifying-Remote-Mapped-Drives) via `$vol.py handles -t File | grep Mup` and `vol.py symlinkscan`
 
-
-"This chapter combines three of the most common initial steps in an investigation"
-
-1. What applications are running
-2. What they're doing
-3. What privilege level they have
+---
 
 
 
@@ -117,7 +120,7 @@ Another way is to do the pool-scanning approach [(by their tags)](windowsmem4n6.
    - Pool-scans `_EPROCCESS` object instead of just walking the `_LIST_ENTRY`
    - [Also here from my notes](windowsmem4n6.md#Building-a-Pool-Scanner)
    - Can make process tree visualization
-     - Suggested method is: `$vol.py psscan \--output=dot  \-\-output-file=processes.dot` then open in [Graphviz](
+     - Suggested method is: `$vol.py psscan \--output=dot  \-\-output-file=processes.dot` then open in [Graphviz](http://graphviz.org)
 
 4. `$vol.py psxview`
 
@@ -136,7 +139,7 @@ The following are other ways to find processes in a memory dump.
  **Direct Kernel Object Manipulation**
 
 - Hide a process by unlinking its entry form the `_LIST_ENTRY` by simply overwriting the Flink and Blink pointers so they  point *around* the `_EPROCCESS` object.
-  - Vol.py pslist is susceptible to this attack! **This is why it's better to use psscan or just psxview.**
+  - Vol.py pslist is susceptible to this attack! **This is why it's better to use psscan, or just psxview.**
 
 - Malware can modify kernel objects by:
   - Loading a kernel driver, which has unrestricted access to objects in kernel memory
@@ -171,8 +174,6 @@ AoMF: "Realistically, it’s far easier to just inject code into a process that�
 
 
 ## Process Tokens
-
-page 164 and slide 190
 
 A process' token describes its security context. The tokens include Security Identifiers (SID) of user/group a given proc is running as AND its privilege's (specific tasks).
 
@@ -262,34 +263,175 @@ A privilege is the permission to perform a specific task, such as debugging a pr
 
 #### Analyzing Explicit Privs
 
-198 or page 172
+- If privileges are explicitly enabled we can claim intent
+  - `SeDebugPrivilege`  and `SeLoadDriverPrivilege` enabled is suspicious
+- Use `$vol.py privs` to check
 
+#### Detecting Token Manipulation
 
+- Cesar Cerrudo found you can bypass Windows API and enable all privileges for a process ev en without them first being present
 
+  - As is the normal flow 1) add priv to token 2) elevate privs
+  - Requires Kernel-level access (like via vol.py)
 
+- Src: https://www.blackhat.com/html/bh-us-12/bh-us-12-briefings.html#Cerrudo
 
+- The DKOM attack works by modifying the *Enaled* member of `_SEP_TOKEN_PRIVILEGES` to *0xFFFFFFFFFFFFFFFF* effectively enabling all possible privileges. Thee *Present* member is **NOT** updated.
 
+  - Can do this in vol.py:
 
+  1. `$vol.py volshell --write`
+  2. `>>> token = proc().get_token()` 
+  3. `>>> bin(token.Privileges.Present)` #precheck
+  4. `>>> bin(token.Privileges.Enabled)` #precheck
+  5. `>>>token.Privileges.Enabled = 0xFFFFFFFFFFFFFFFF`
+  6. `>>> bin(token.Privileges.Present)` #check
+  7. `>>> bin(token.Privileges.Enabled)` #check
+  8. `>>> quit()`
 
+  
 
+- Reveal the Truth via `vol.py privs`
 
-
-
-
-
-
-
-
-
+  - Doesn't use same logic as Windows API so you'll see ALL privs- enabled or present
 
 
 
 ## Process Handles
 
-page 176 or 202
+A **handle** := an open instance of a kernel object (file, registry key, mutex, process, or thread)
+
+- From enumerating handles, you can learn:
+  - what proc was reading or writing a particular file
+  - what proc accessed one of the reigstry run keys
+  - which proc mapped remote file systems
+
+
+
+### Lifetime of a Handle
+
+1. Init
+2. Work with
+3. Close
+
+
+
+#### Initialization of a Handle
+
+1. Open a handle via API like `CreateFile`, `RegOpenKeyEx`, or `CreateMutex` which return a data type *HANDLE*; this is an index into a process-specific handle table
+   - Ex: `CreateFile` API will place a pointer to the corresponding `_FILE_OBJECT` in kernel memory is added to the first available slot in the proc's handle tale. The index in that handle table is returned.
+2. Handle count on object is incremented
+3. The proc then passes the *HANDLE* value to functions that perform CRUD operations on the object 
+
+#### Working with a Handle
+
+This initialization then allows APIs (like `ReadFile`, `WriteFile`) to work in the following manner:
+
+1. Find the base address fo the calling proc's handle table
+2. Seek to the known index that was returned in the *HANDLE* value
+3. Retrieve `_FILE_OBJECT` pointer
+4. Profit
+
+#### Closing a Handle
+
+When finished with the object, to close the handle (via `CloseHandle`, `RegCloseHandle`, etc):
+
+1. Decriment object's handle count
+2. Remove the pointer to the object from the proc's handle table
+
+- **NOTE: Handle table index can be reused to store another type of object. However, the actual object (i.e. `_FILE_OBJECT`) will not be freed or overwritten until the handle count reaches zero. This prevents a proc from deleting an object that is currenttly in use by another proc.**
+
+
+
+### Reference Counts and Kernel Handles
+
+Other than processes, kernel modules and threads can call equivalent kernel APIs (i.e., `NtCreateFile`, `NtReadFile`, `NtCreateMutex`)
+
+-  These handles are allocated from `System` (PID 4) process' handle table. Here, code can access existing objects directly (without opening handles)
+  - Can be done "correctly" via `ObReferenceObjectByPointer` API. This will increment the reference counter (rather than handle counter) so the OS will not delete the object.
+    - If you don't use this method, objects may persist unnecessarily (aka a handle/reference leak)
+
+- Note: after a process terminates, its handle table is destroyed, but that doesn’t mean all objects created by the process are destroyed at the same time.
+
+
+
+### Handle Table Internals
+
+page 178 or 204
+
+` _EPROCESS.ObjectTable` member points to a handle table ( `_HANDLE_TABLE`).
+
+- the `TableCode` member says the number of levels in the table and points to the address of the first level.
+  - Default is single-level table with 1 level == 1 page (4096 B) allowing for 512 handles per process on 32-bit systems (double it for 64-bit)
+  - Each index contains a `_HANDLE_TABLE_ENTRY` struct or a zero to indicate emptiness. These have `Object` members which point to the `_OBJECT_HEADER` which you can then find an object's name (via `_FILE_OBJECT` member) and its body (right below the `OBJECT_HEADER`).
+
+<img src="pht.assets/image-20200622160240756.png" alt-text="single-level handle table" />
+
+- MATH: Larger processes require more handles. This means a proc can have up to 3 levels. First will be that 1-page sized block of memory divded into 1024 on 32-bit, or 512 slots on 64-bit systems. These slots are pointers to an array of `_HANDLE_TABLE_ENTRY` structs. Therefore, a 3-level table can hold $1024^2 * 512 =$ ~536M theoretical handles. The observable limit is actually [only about 16M](https://techcommunity.microsoft.com/t5/windows-blog-archive/pushing-the-limits-of-windows-handles/ba-p/723848).
+
+  
 
 ## Enumerating Handles in Memory
 
+- Can use `$vol.py handles` plugin that walks the handle table struct
+- Can filter by procID, procOffset, object type, and name
+
+### Finding Zeus Indicators
+
+From the [Zeus sample](https://code.google.com/p/
+malwarecookbook/source/browse/trunk/17/1/zeus.vmem.zip)
+
+- `$vol.py -p 632 handles` (winlogon.exe) -- shows too many
+- `$vol.py -p 32 handles -t File,Mutant -s` -- search files and mutexes open. Here we see the files that contain the trojan's config info (user.ds and local.ds) as well as the installer in the System32 directory (sdra64.exe)
+  - Also see artifacts of network sockets (`\Device\TCP|IP`)
+  - Named pipe found called *_AVIRA_* (found since mutex is needed to access)
+
+### Detecting Registry Persistence
+
+Page 183 or 209
+
+- Malware will leverage the registry
+- Recal how handles work, they must open a handle to the key (usually a Run* key)
+- `$vol.py handles --object-type=Key --pid=1700`
+  - This shows lots of handles open to the same Run key
+    - In this example there’s a loop that executes periodically to ensure that the persistence values are still intact (just in case an antivirus product or administrator removed them)
+- To confirm these: `$vol.py printkey -K "Microsoft\Windows\CurrentVersion\Run"`
+  - Found 2 *.exe's that run on boot ('the (S)' for Stable)
+
+### Identifying Remote Mapped Drives
+
+Successful lateral movement can be accomplished by:
+
+- obtaining RW to SMB file server
+- mapping remote drives via `>net view && net use` 
+- and more
+
+Indicators of these activities can be found in a process handle table.
 
 
-end page 187
+
+#### Example
+
+Attacker navigates the network to mount two remote drives; *Users* directory mounted on $P$ and *$C* share mounted on $Q$.
+
+1. `>net view` will show the remote driver
+2. `>net use q: \\LH-7J...\C$` will mount drives
+3. `>net use` again, shows the remote mapped drives
+4. `>cd Q:\Users\Sharm\Documents ` 
+
+
+
+To then find evidence of this, look for file handles prefixed with `\Device\Mup`, aka Multiple Universal Naming Conventions (UNC) Provider which is a kernel-mode component that requrests access to remote files using UNC names with the appropriate redirector. In this case, it is called *LanmanRedirector* which handles the SMB protocol.
+
+1. `$vol.py handles -t File | grep Mup`
+   - Will find under *Details* tab,**\Device\Mup ;P:000000000002210f\WIN-464MMR8O7GF\Users** and **\Device\Mup\;Q:000000000002210f\LH-7J277PJ9J85I\C$\Users\Jimmy\Documents**
+     - The long numbers are the NetBIOS name
+   - Under the *Pid* tab, we should then go to pid 752 (LanmanWorkstation service that maintains connection to remote server using SMB) and 1544 (cmd.exe)
+2. `vol.py symlinkscan` - can find object assosiated with drive letters
+   - Will output $q$ and $p$ drive to paths
+   - This method gives you exact time remote share was mounted
+   - Can also extract command history from cmd.exe proc (pid 1544 in this case via `$vol.py cmdline`)
+
+
+
+[Vol.py Cheat sheet by hacktricks.xyz](https://book.hacktricks.xyz/forensics/volatility-examples)
