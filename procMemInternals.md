@@ -6,7 +6,7 @@
 
 ### Address Space Layout Details
 
-<img src="procMemInternals.Pictures/image-20200625092605148.jpg" height=350 width=300 align="left" />
+<img src="procMemInternals.Pictures/image-20200625092605148.jpg" height=350 width=300 />
 
 - Dynamic Linked Libraries - where shared libraries are loaded into address space by the process or by library injection attack
 - Environment variables
@@ -23,7 +23,7 @@
 
 **<u>Abstraction</u>**
 
-<img src="procMemInternals.Pictures%5Cimage-20200625112013225.png" height=400/>
+<img src="procMemInternals.Pictures/image-20200625112013225.png" height=400/>
 
 #### Heap Manager
 
@@ -121,7 +121,7 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
       - *However*, certain tools that don't use this search method (VAD Flags), they use `VirtualQueryEx()` which doesn't search the *Protection* member.
     - The *PrivateMemory* field is for memory regions that cannot be shared with or inherited by other procs. If the field/bit is set it contains some type of the following data: heap, stack, and ranges allocated with `VirtualAlloc(Ex)`. Recall looking for that `VirtualAllocEx` function may be a sign of injected shell code.
 
-<img src="procMemInternals.Pictures/image-20200704000207000.png" height=350 align="left" alt-text="Different permission access types"/>
+<img src="procMemInternals.Pictures/image-20200704000207000.png" height=350 alt-text="Different permission access types"/>
 
 #### Volatility VAD Plugins Walkthrough
 
@@ -143,7 +143,7 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 
 2. Next we want to cross-reference this via volshell to prove that it is some sort of internet file. And so it is; it's a UrlCache!
 
-<img src="procMemInternals.Pictures%5Cimage-20200704001917098.png" height=150/>
+<img src="procMemInternals.Pictures/image-20200704001917098.png" height=150/>
 
 3. Now let's dump that with *vaddump*. Note: you should use the *- -base* argument to dump just the needed regions. Also, recall *vaddump* will pad with zero's to solve [page swap issue](https://github.com/jklm264/My-Forensics-Notes/blob/master/Tools/Rekall_learning/Rekall_LiveMemInspect.md).
    - **Note:** `$vol.py evtlogs` plugin leverages same functionality as *vaddump* but for log files.
@@ -170,11 +170,11 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 
 Much easier (than the above method) to just do a yara scan, with the *- -wide* argument to search for Unicode too:
 
-<img src="procMemInternals.Pictures/image-20200704003640354.png" height=200 align="left"/>
+<img src="procMemInternals.Pictures/image-20200704003640354.png" height=200 />
 
 Can be useful for (and sources for signatures):
 
-<img src="procMemInternals.Pictures/image-20200704003311966.png" height=200 align="left"/>
+<img src="procMemInternals.Pictures/image-20200704003311966.png" height=200 />
 
 - Ex: `$vol.py yarascan --pid=1080,1140 --wide --yara-rules="windows-update-http.com"`
 - Can add regex like so: ` $vol.py --yara-rules="/(www|net|com|org)/" --kernel`
