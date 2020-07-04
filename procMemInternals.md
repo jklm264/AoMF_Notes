@@ -6,7 +6,7 @@
 
 ### Address Space Layout Details
 
-<img src="procMemInternals.Pictures/image-20200625092605148.jpg" height=350 width=300 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200625092605148.jpg" height=350 width=300 /></kdb>
 
 - Dynamic Linked Libraries - where shared libraries are loaded into address space by the process or by library injection attack
 - Environment variables
@@ -21,9 +21,9 @@
 
 ### Memory Allocation APIs
 
-**<u>Abstraction</u>**
+**<u></kdb>Abstraction</u></kdb>**
 
-<img src="procMemInternals.Pictures/image-20200625112013225.png" height=400/>
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200625112013225.png" height=400/></kdb>
 
 #### Heap Manager
 
@@ -36,12 +36,12 @@
 
 - Few APIs allow full control over permissions of allocated memory.
 - `VirtualAlloc` does just this; allows to specify which memory should be no-access, RWX, guarded, or a combination of all.
-- **Note:** Heaps are <u>*always*</u> RW. Even more, you can make a heap executable (via the `HEAP_CREATE_ENABLE_EXECUTE` parameter to `HeapCreate()`. Enter defense mechanism DEP.
+- **Note:** Heaps are <u></kdb>*always*</u></kdb> RW. Even more, you can make a heap executable (via the `HEAP_CREATE_ENABLE_EXECUTE` parameter to `HeapCreate()`. Enter defense mechanism DEP.
 
-	> W^X/DEP (Data Execution Prevention) - prevent attack code execution by marking data as non-executable and code as non-writable
-	>
-	> - "can’t have writable and executable block of memory”
-	> - Does NOT defend against code reuse attacks (ret2libc, ROP)
+	></kdb> W^X/DEP (Data Execution Prevention) - prevent attack code execution by marking data as non-executable and code as non-writable
+	></kdb>
+	></kdb> - "can’t have writable and executable block of memory”
+	></kdb> - Does NOT defend against code reuse attacks (ret2libc, ROP)
 
 
 #### Scope and Flexibility
@@ -94,7 +94,7 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 
   - In the `*_LONG` versions of these structures they include much more detailed information like the *Subsection* member which the OS uses to track information on files or DLLs mapped into the region. Unlike the `*_SHORT` and `_MMVAD` structures which do not contain this useful info. This means if you are hunting for code injection and looking for evidence in the VAD tree structs you should **ONLY** be looking in the `*_LONG` structs.
 
-  <img src="procMemInternals.Pictures/image-20200703171743055.png" width=500 />
+  <kdb></kdb><img src="procMemInternals.Pictures/image-20200703171743055.png" width=500 /></kdb>
 
   - `_MMVAD` is aliased to `_MMADDRESS_NODE`
 
@@ -105,13 +105,13 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 - In regards to the alias of `_MMADDRESS_NODE`, programs including vol.py know what type of structure it is aliased to via its *Tag* member in the `_MMVAD*` structure. 
 - The *Tag* is at address *-0xc* (from the vol.py volshell output above) which is the *PoolTag* member of the `_POOL_HEADER` which is always directly before the node.
 
-<img src="procMemInternals.Pictures/image-20200703171957277.png" height=200 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200703171957277.png" height=200 /></kdb>
 
 - When looking for injected shellcode you should look for *VadS* or *VadF* tags since the code won't be backed by a file otherwise.
 
 #### VAD Flags
 
-- `<unnamed-tag>` fields found in Microsoft debugging symbols because the unions don't have associated types.
+- `<unnamed-tag></kdb>` fields found in Microsoft debugging symbols because the unions don't have associated types.
 - They are located in  the nodes *u* member; so looking for *_MMVAD.u.VadFlags*, or in vollshell as `dt("_MMVAD_FLAGS")`.
   - That output includes members like CommitCharge, NoChange, VadType, MemCommit, Protection, Spare, and PrivateMemory.
     - *CommitCharge* specifies the number of pages committed in the region described by the VAD node.
@@ -121,7 +121,7 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
       - *However*, certain tools that don't use this search method (VAD Flags), they use `VirtualQueryEx()` which doesn't search the *Protection* member.
     - The *PrivateMemory* field is for memory regions that cannot be shared with or inherited by other procs. If the field/bit is set it contains some type of the following data: heap, stack, and ranges allocated with `VirtualAlloc(Ex)`. Recall looking for that `VirtualAllocEx` function may be a sign of injected shell code.
 
-<img src="procMemInternals.Pictures/image-20200704000207000.png" height=350 alt-text="Different permission access types"/>
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704000207000.png" height=350 alt-text="Different permission access types"/></kdb>
 
 #### Volatility VAD Plugins Walkthrough
 
@@ -131,24 +131,24 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 
    - CommitCharge and MemCommit flags are of interest for this *(VAD)_SHORT* (child node) struct along with the  procs memory range.
 
-   <img src="procMemInternals.Pictures/image-20200704000915890.png" height=150/>
+   <kdb></kdb><img src="procMemInternals.Pictures/image-20200704000915890.png" height=150/></kdb>
 
    - This one is actually nothing of interest while looking at the flags and protection other than the fact memory has been set aside though it is not paired with any physical pages.
 
-   <img src="procMemInternals.Pictures/image-20200704000931849.png" height=100 />
+   <kdb></kdb><img src="procMemInternals.Pictures/image-20200704000931849.png" height=100 /></kdb>
 
    - The *Vad* tag means they're of type *_LONG* which means there might be valuable data. Indeed there is; we see *index.dat* and *ntdll.dll* with the protection set to *PAGE_EXECUTE_WRITECOPY*!
 
-<img src="procMemInternals.Pictures/image-20200704001807180.png" height=330/>
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704001807180.png" height=330/></kdb>
 
 2. Next we want to cross-reference this via volshell to prove that it is some sort of internet file. And so it is; it's a UrlCache!
 
-<img src="procMemInternals.Pictures/image-20200704001917098.png" height=150/>
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704001917098.png" height=150/></kdb>
 
 3. Now let's dump that with *vaddump*. Note: you should use the *- -base* argument to dump just the needed regions. Also, recall *vaddump* will pad with zero's to solve [page swap issue](https://github.com/jklm264/My-Forensics-Notes/blob/master/Tools/Rekall_learning/Rekall_LiveMemInspect.md).
    - **Note:** `$vol.py evtlogs` plugin leverages same functionality as *vaddump* but for log files.
 
-<img src="procMemInternals.Pictures/image-20200704001955645.png" height=120 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704001955645.png" height=120 /></kdb>
 
 #### Traversing the VAD in Python
 
@@ -156,25 +156,25 @@ Each process has a pointer to the root of the proc's VAD tree: `_EPROCESS.VadRoo
 
 - **Note:** *dlllist, ldrmodules,* and *malfind* automate the finding of executables in this manner- with validators.
 
-<img src="procMemInternals.Pictures/image-20200704002349764.png" height=100 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704002349764.png" height=100 /></kdb>
 
-<img src="procMemInternals.Pictures/image-20200704002515057.png" height=150 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704002515057.png" height=150 /></kdb>
 
 #### Passwords in Browser Memory
 
 - If using a web proxy to capture outgoing POST data during a login (via Burp Suite) you can forensically find this data like so
 
-<img src="procMemInternals.Pictures/image-20200704003022362.png" height=300 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704003022362.png" height=300 /></kdb>
 
 #### Scanning Memory with Yara
 
 Much easier (than the above method) to just do a yara scan, with the *- -wide* argument to search for Unicode too:
 
-<img src="procMemInternals.Pictures/image-20200704003640354.png" height=200 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704003640354.png" height=200 /></kdb>
 
 Can be useful for (and sources for signatures):
 
-<img src="procMemInternals.Pictures/image-20200704003311966.png" height=200 />
+<kdb></kdb><img src="procMemInternals.Pictures/image-20200704003311966.png" height=200 /></kdb>
 
 - Ex: `$vol.py yarascan --pid=1080,1140 --wide --yara-rules="windows-update-http.com"`
 - Can add regex like so: ` $vol.py --yara-rules="/(www|net|com|org)/" --kernel`
