@@ -11,8 +11,9 @@
 
 4. [Memory Acquisition](memacq.md#Memory-Acquisition)
 1. [The Tools](memacq.md#The-Tools)
-   2. [Steps to Recover the Hibernation File and PageFile](memacq.md#Steps-to-Recover-the-Hibernation-File-and-PageFile)
-   3. [Steps to Extract Registry Hives](memacq.md#Steps-to-Extract-Registry-Hives)
+   
+   1. [Steps to Recover the Hibernation File and PageFile](memacq.md#Steps-to-Recover-the-Hibernation-File-and-PageFile)
+   2. [Steps to Extract Registry Hives](memacq.md#Steps-to-Extract-Registry-Hives)
    
 5. [Windows Memory Forensics](windowsmem4n6.md)
 
