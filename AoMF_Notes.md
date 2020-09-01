@@ -60,7 +60,7 @@
 
 ### Timelining
 
-
+---
 
 ## Linux
 
@@ -68,3 +68,5 @@
 20. [Linux Operating System](linuxOS.md)
     - [GOT and PLT resource](https://www.airs.com/blog/archives/41)
 21. [Processes and Process Memory](procsandProcMem.md) (slide 637)
+
+- [Linux Course](LinuxOS_course/)
