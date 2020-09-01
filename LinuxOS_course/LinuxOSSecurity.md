@@ -1,4 +1,4 @@
-# Linux OS Security (FedVTE)
+# Linux OS Security
 
 ## Booting Linux
 
