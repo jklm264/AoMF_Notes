@@ -59,3 +59,12 @@
 ### Event Reconstruction
 
 ### Timelining
+
+
+
+## Linux
+
+19. [Linux Memory Acquisition](linuxMemoryAcquisition.md)
+20. [Linux Operating System](linuxOS.md)
+    - [GOT and PLT resource](https://www.airs.com/blog/archives/41)
+21. [Processes and Process Memory](procsandProcMem.md) (slide 637)
