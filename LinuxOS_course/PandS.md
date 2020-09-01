@@ -55,7 +55,7 @@ Group ID (GID) and Effective GID (EGID)
 
 ## Signals
 
-[CPD lecture 6](6signals.pptx) and[CPD lecture 8](8ipc.pptx)
+[CPD lecture 6](6signals.pdf) and[CPD lecture 8](8ipc.pdf)
 
 
 
