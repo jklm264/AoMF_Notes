@@ -70,3 +70,5 @@
 21. [Processes and Process Memory](procsandProcMem.md) (slide 637)
 
 - [Linux Course](LinuxOS_course/)
+- [Miscellaneous Linux Knowledge](linuxMisc.md) - systemd
+- [Linux Upskill Notes](#) - Coming soon
