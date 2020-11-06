@@ -11,6 +11,7 @@
 9. [File System Security](fsSec.md)
 10. [Users and Groups](uandg.md)
 11. [CRUD Users](crudusers.md)
+12. [User Privilege Escalation](uprivesc.md)
 
 
 
