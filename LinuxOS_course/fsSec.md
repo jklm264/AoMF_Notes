@@ -137,4 +137,4 @@ Ex: LIDS (protects even from root), Tomoyo (very user friendly), SELinux (NSA-ma
 
 
 
-[NSA Linux RHEL5  Hardening Guide](https://apps.nsa.gov/iaarchive/customcf/openAttachment.cfm?FilePath=/iad/library/ia-guidance/security-configuration/operating-systems/assets/public/upload/Guide-to-the-Secure-Configuration-of-Red-Hat-Enterprise-Linux-5.pdf&WpKes=aF6woL7fQp3dJi3jCq6chGLM5WJEqQDFLHX5gE)
+[NSA Linux RHEL5  Hardening Guide](https://apps.nsa.gov/iaarchive/library/ia-guidance/security-configuration/operating-systems/guide-to-the-secure-configuration-of-red-hat-enterprise.cfm)
