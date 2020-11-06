@@ -9,6 +9,8 @@
 7. [Procs and Signals](PandS.md)
 8. [Process Monitoring](procMon.md)
 9. [File System Security](fsSec.md)
+10. [Users and Groups](uandg.md)
+11. [CRUD Users](crudusers.md)
 
 
 
