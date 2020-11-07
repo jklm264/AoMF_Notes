@@ -1,17 +1,22 @@
 # Linux OS Security ToC
 
-1. [LinuxOSSecurity](LinuxOSSecurity.md)
-2. [Recovery](Recovery.md)
-3. [startupScripts](startupScripts.md)
-4. [startupProcesses](startupProcesses.md)
-5. [runLevels](runLevels.md)
-6. [Chkconfig and Upstart](serviceTools.md)
-7. [Procs and Signals](PandS.md)
-8. [Process Monitoring](procMon.md)
-9. [File System Security](fsSec.md)
-10. [Users and Groups](uandg.md)
-11. [CRUD Users](crudusers.md)
-12. [User Privilege Escalation](uprivesc.md)
+1. Introduction/Security-Model
+   1. [LinuxOSSecurity](LinuxOSSecurity.md)
+   2. [Recovery](Recovery.md)
+   3. [startupScripts](startupScripts.md)
+   4. [startupProcesses](startupProcesses.md)
+   5. [runLevels](runLevels.md)
+   6. [Chkconfig and Upstart](serviceTools.md)
+   7. [Procs and Signals](PandS.md)
+   8. [Process Monitoring](procMon.md)
+   9. [File System Security](fsSec.md)
+2. Users and Groups
+   1. [Introduction](uandg.md)
+   2. [CRUD Users](crudusers.md)
+   3. [User Privilege Escalation](uprivesc.md)
+   4. [User Authentication Schems](uAuth.md)
+3. Threats and Vulnerabilities
+   1. [Viruses and Worms]()
 
 
 
