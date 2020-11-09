@@ -18,8 +18,10 @@
 3. Threats and Vulnerabilities
    1. [Viruses and Worms](vandw.md)
    2. [Other Techniques](misc_vandw.md)
-4. Linux Distributions and Software Upgrades
-   1. [Automated Installations]()
+4. Distributions and Software Upgrades
+   1. [Automated Installations](autoinstall.md)
+5. Networking and Wireless Security
+   1. [Blanket name]()
 
 
 
