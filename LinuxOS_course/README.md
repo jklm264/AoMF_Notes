@@ -16,8 +16,10 @@
    3. [User Privilege Escalation](uprivesc.md)
    4. [User Authentication Schems](uAuth.md)
 3. Threats and Vulnerabilities
-   1. [Viruses and Worms](vandw)
-   2. [Other Techniques](misc_vandw)
+   1. [Viruses and Worms](vandw.md)
+   2. [Other Techniques](misc_vandw.md)
+4. Linux Distributions and Software Upgrades
+   1. [Automated Installations]()
 
 
 
