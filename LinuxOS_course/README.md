@@ -9,12 +9,12 @@
    6. [Chkconfig and Upstart](serviceTools.md)
    7. [Procs and Signals](PandS.md)
    8. [Process Monitoring](procMon.md)
-   9. [File System Security](fsSec.md)
+   9. [File System Security](fsSec.md) - DAC
 2. Users and Groups
    1. [Introduction](uandg.md)
    2. [CRUD Users](crudusers.md)
    3. [User Privilege Escalation](uprivesc.md)
-   4. [User Authentication Schems](uAuth.md)
+   4. [User Authentication Schemes](uAuth.md)
 3. Threats and Vulnerabilities
    1. [Viruses and Worms](vandw.md)
    2. [Other Techniques](misc_vandw.md)
@@ -25,8 +25,8 @@
    2. [Tunneling](networking2.md)
    3. [Network File Shares](netfileshare.md)
 6. Security Features
-   1. [GRUB]()
-   2. [SELinux]()
+   1. [GRUB](grub.md)
+   2. [SELinux](selinux.md) - MAC
    3. [IPTables]()
    4. [moar!]()
 

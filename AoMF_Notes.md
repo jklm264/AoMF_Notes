@@ -11,7 +11,7 @@
 
 4. [Memory Acquisition](memacq.md#Memory-Acquisition)
 1. [The Tools](memacq.md#The-Tools)
-   
+  
    1. [Steps to Recover the Hibernation File and PageFile](memacq.md#Steps-to-Recover-the-Hibernation-File-and-PageFile)
    2. [Steps to Extract Registry Hives](memacq.md#Steps-to-Extract-Registry-Hives)
    
@@ -69,6 +69,7 @@
     - [GOT and PLT resource](https://www.airs.com/blog/archives/41)
 21. [Processes and Process Memory](procsandProcMem.md) (slide 637)
 
-- [Linux Course](LinuxOS_course/)
+- [Linux Course](LinuxOS_course/README.md)
 - [Miscellaneous Linux Knowledge](linuxMisc.md) - systemd
+- [Useful Scripting](scriptingfun.md)
 - [Linux Upskill Notes](#) - Coming soon
