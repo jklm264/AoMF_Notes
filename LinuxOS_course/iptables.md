@@ -26,7 +26,7 @@ Three chains:
 
 
 
-## Synatx
+## Syntax
 
 - iptables [-t table_name=Filter] command chain_name rule_specfiication[options]
 - -L lists rules -----> Use **-nvL** instead
@@ -136,7 +136,7 @@ To take packets bound for port 422 and forward them to 10.10.254.201 port 22:
 
 
 
-##IPFilter
+## IPFilter
 
 Pre-iptables; mainly BSD distros.
 
