@@ -33,7 +33,9 @@
    6. [Host Intrusion Detection System](hids.md)
    7. [Anti-Virus](av.md)
    8. [Log Management](logmgmt.md)
-
+7. [Linux BASH Scripting](scriptbasics.md)
+8. Linux Hardening
+   1. [Intro](hardintro.md)
 
 
 ## Hal Vids
