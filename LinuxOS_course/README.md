@@ -36,6 +36,8 @@
 7. [Linux BASH Scripting](scriptbasics.md)
 8. Linux Hardening
    1. [Intro](hardintro.md)
+   2. [Hardening Guides](hardguide.md)
+   3. [Vulnerability Scanning](vulnscan.md)
 
 
 ## Hal Vids
