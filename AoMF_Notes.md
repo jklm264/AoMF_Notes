@@ -73,3 +73,9 @@
 - [Miscellaneous Linux Knowledge](linuxMisc.md) - systemd
 - [Useful Scripting](scriptingfun.md)
 - [Linux Upskill Notes](#) - Coming soon
+
+
+
+## Misc
+
+- [Email Forensics](emailanalysis.md)
